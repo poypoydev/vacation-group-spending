@@ -8,15 +8,40 @@ import {
 
 export const groupRouter = createTRPCRouter({
   add: publicProcedure.mutation(async ({ input, ctx }) => {
-    await ctx.prisma.spendingGroup.create({
-      data: {
-        name: "Poyraz's Group",
-        users: ["64027bcffa8b812aec8e552b"],
-      },
-    });
-    return {
-      ok: `yes`,
-    };
+    // await ctx.prisma.spendingGroup.create({
+    //   data: {
+    //     name: "Poyraz's Group",
+    //     users: ["64027bcffa8b812aec8e552b"],
+    //   },
+    // });
+
+    ctx.prisma.spending
+      .create({
+        data: {
+          name: "Poyraz's Group",
+          users: [
+            {
+              userId: "64027bcffa8b812aec8e552b",
+              name: "Poyraz",
+              image:
+                "https://www.indiewire.com/wp-content/uploads/2022/02/Ana-de-Armas.jpg",
+            },
+          ],
+          spendingGroupID: "64028482c32f2ac4724d5f64",
+          amount: 25,
+        },
+      })
+      .then(() => {
+        console.log("finito");
+        return {
+          data: "allSpendings",
+        };
+      });
+    // const allSpendings = await ctx.prisma.spending.findMany({
+    //   where: {
+    //     spendingGroupID: "64028482c32f2ac4724d5f64",
+    //   },
+    // });
   }),
   getAll: publicProcedure.query(async ({ ctx }) => {
     const userID = ctx.session?.user.id;
@@ -33,11 +58,14 @@ export const groupRouter = createTRPCRouter({
       },
     });
 
-    return data;
+    return {
+      data,
+    };
   }),
+
   check: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
     const len = input.length;
-    if (len < 24) {
+    if (len < 24 || len > 24) {
       return {
         error: "Too short",
       };
@@ -69,8 +97,14 @@ export const groupRouter = createTRPCRouter({
       };
     }
 
+    // everything is fine return all spendings.
+    const allSpendings = await ctx.prisma.spending.findMany({
+      where: {
+        spendingGroupID: groupData.id,
+      },
+    });
     return {
-      greeting: `Hello ${ctx.session?.user.name}`,
+      data: allSpendings,
     };
   }),
 });

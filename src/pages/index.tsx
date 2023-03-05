@@ -1,12 +1,15 @@
 import { type NextPage } from "next";
+import { getServerSession, Session } from "next-auth";
 import { signIn, useSession, signOut } from "next-auth/react";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { authOptions } from "~/server/auth";
 import { api } from "~/utils/api";
 
-const Home: NextPage = () => {
-  const { data: session, status } = useSession();
+const Home: NextPage = ({}) => {
+  const { status, data: session } = useSession();
+  const router = useRouter();
 
-  const mutation = api.group.add.useMutation();
   const ownGroups = api.group.getAll.useQuery();
   if (status === "loading") {
     return <span>Loading...</span>;
@@ -25,17 +28,40 @@ const Home: NextPage = () => {
       </Head>
       <h1>Whatsup</h1>
       <button onClick={() => signOut()}>Sign Out</button>
-      <button
-        onClick={() => {
-          mutation.mutate();
-        }}
-      >
-        Create
-      </button>
-      {JSON.stringify(session)}
+
       <p className="my-32">{JSON.stringify(ownGroups.data)}</p>
+
+      {ownGroups.data?.data?.map((group, index) => {
+        return (
+          <button
+            onClick={() => {
+              router.push(`/groups/${group.id}`);
+            }}
+            className="rounded-md bg-blue-400 px-2 py-1"
+          >
+            {group.name}
+          </button>
+        );
+      })}
     </>
   );
 };
 
 export default Home;
+
+export async function getServerSideProps(context: any) {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/auth/login",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+}
