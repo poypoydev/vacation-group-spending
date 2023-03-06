@@ -3,7 +3,6 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 import { FC } from "react";
 import { ImExit, ImCog, ImUser, ImAirplane } from "react-icons/im";
-import { FaHandPeace } from "react-icons/fa";
 
 import { signOut } from "next-auth/react";
 
@@ -15,12 +14,13 @@ const NavDropMenu: FC<{ image: string; name: string }> = ({ image, name }) => {
           className="mr-2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white outline-black "
           aria-label="Customise options"
           style={{
-            backgroundImage: `url(${image})`,
+            backgroundImage: `url('${image}')`,
             backgroundSize: "cover",
           }}
         />
+        {/* <img src={image} /> */}
       </DropdownMenu.Trigger>
-
+      {/* <p>{image}</p> */}
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           className="mr-3 min-w-[15%] rounded-md border bg-white p-2 shadow-md "
@@ -51,9 +51,9 @@ const NavDropMenu: FC<{ image: string; name: string }> = ({ image, name }) => {
           <DropdownMenu.Separator className=" h-[1px] w-full bg-[#DCDCDC] " />
           <DropdownMenu.Item
             onClick={() => signOut()}
-            className="flex h-6 select-none items-center rounded-sm  py-2  text-[13px] text-[#77878b] outline-none md:px-1"
+            className="mt-1 flex h-6 select-none items-center  rounded-sm py-2  text-[13px] text-[#77878b] outline-none md:px-1"
           >
-            <div className="mr-auto mt-[5px] pr-1">
+            <div className="relative left-[1px] mr-auto mt-[5px]">
               <ImExit size={15} />
             </div>
             Log Out{" "}

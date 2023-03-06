@@ -7,3 +7,15 @@
     @apply h-screen w-screen;
   }
 }
+
+.bomboclar {
+  transition: all 0.5s;
+}
+
+.bomboclar:nth-child(n + 2) {
+  margin-left: -20px;
+}
+
+.bomboclat:hover .bomboclar:nth-child(n + 2) {
+  margin-left: -10px;
+}

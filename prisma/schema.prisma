@@ -74,6 +74,7 @@ model Spending {
     name String
     amount Int
     users         userSpender[]
+    createdAt DateTime @default(now())
 }
 
 

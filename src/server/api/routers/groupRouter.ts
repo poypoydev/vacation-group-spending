@@ -15,6 +15,8 @@ export const groupRouter = createTRPCRouter({
     //   },
     // });
 
+    // await ctx.prisma.spending.deleteMany();
+
     ctx.prisma.spending
       .create({
         data: {
@@ -29,6 +31,7 @@ export const groupRouter = createTRPCRouter({
           ],
           spendingGroupID: "64028482c32f2ac4724d5f64",
           amount: 25,
+          createdAt: new Date(),
         },
       })
       .then(() => {
@@ -105,6 +108,7 @@ export const groupRouter = createTRPCRouter({
     });
     return {
       data: allSpendings,
+      group: groupData,
     };
   }),
 });
