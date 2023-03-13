@@ -4,25 +4,41 @@ import { useSession } from "next-auth/react";
 
 import { useRouter } from "next/router";
 import { motion } from "framer-motion";
-import { FC } from "react";
+import { FC, useState } from "react";
 import AuthenticatedLayout from "~/layouts/AuthenticatedLayout";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/utils/api";
 import { BsPlus } from "react-icons/bs";
 import { Spending } from "@prisma/client";
+import DialogMenu from "~/components/DialogMenu";
+import Alert from "~/components/Alert";
 
 const GroupPage: NextPage = ({}) => {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const { group } = router.query;
-  const middleCheck = api.group.check.useQuery(group as string);
-
+  const [open, setOpen] = useState<boolean>(false);
+  const [alert, setAlert] = useState<string>("");
   const mutation = api.group.add.useMutation({
     onSuccess: async (input) => {
       console.log("added");
     },
   });
-
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { group } = router.query;
+  const middleCheck = api.group.check.useQuery(group as string);
+  const handleRefetch = async (object: { name: string; amount: number }) => {
+    await mutation.mutateAsync({
+      name: object.name,
+      amount: object.amount,
+      groupId: group as string,
+    });
+    middleCheck.refetch();
+    setAlert(
+      `Added a new spending of ${object.amount}$ to ${middleCheck.data?.group?.name}`
+    );
+    setTimeout(() => {
+      setAlert("");
+    }, 4000);
+  };
   if (middleCheck.data?.error) {
     router.push("/");
   }
@@ -47,7 +63,7 @@ const GroupPage: NextPage = ({}) => {
         className="mt-8 flex items-center justify-between   py-2
        "
       >
-        <div className="ml-2">
+        <div className="ml-4">
           <h1 className=" relative bottom-[1px]  text-2xl font-semibold">
             {middleCheck.data?.group?.name}
           </h1>
@@ -59,13 +75,12 @@ const GroupPage: NextPage = ({}) => {
             transition: { duration: 1 },
           }}
           whileTap={{ scale: 0.9 }}
-          disabled={mutation.isLoading}
           className=" mr-2 mt-[1.5px] rounded-md bg-green-400 px-4 py-1"
-          onClick={async () => {
-            await mutation.mutateAsync();
-            middleCheck.refetch();
-
+          onClick={() => {
+            // await mutation.mutateAsync();
+            // middleCheck.refetch();
             // setRefresh((prev) => !prev);
+            setOpen(true);
           }}
         >
           <BsPlus size={22} />
@@ -76,27 +91,13 @@ const GroupPage: NextPage = ({}) => {
           return <Spending key={index} spending={spending} />;
         })}
       </div>
-      {/* {mutation.isLoading ? <span>loading</span> : <span>finished</span>} */}
-      {/* {middleCheck.data?.data?.map((spending, index) => {
-        return (
-          <div
-            className="inline-block rounded-md border bg-red-400 p-4"
-            key={index}
-          >
-            <span>{spending.name}</span>
-            <h1 className="text-2xl font-semibold">{spending.amount}</h1>
-            {spending.users.map((val, index) => {
-              return (
-                <div key={`Deneme${index}`}>
-                  <img src={val.image} width={40} height={40} alt="PF" />
-                  <h1>{val.name}</h1>
-                </div>
-              );
-            })}
-          </div>
-        );
-      })} */}
-      {/* <p>{JSON.stringify(session)}</p> */}
+      <Alert open={alert} />
+      <DialogMenu
+        setOpen={setOpen}
+        open={open}
+        refetch={handleRefetch}
+        users={middleCheck.data?.group?.users}
+      />
     </AuthenticatedLayout>
   );
 };

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { string, z } from "zod";
 
 import {
   createTRPCRouter,
@@ -7,45 +7,39 @@ import {
 } from "~/server/api/trpc";
 
 export const groupRouter = createTRPCRouter({
-  add: publicProcedure.mutation(async ({ input, ctx }) => {
-    // await ctx.prisma.spendingGroup.create({
-    //   data: {
-    //     name: "Poyraz's Group",
-    //     users: ["64027bcffa8b812aec8e552b"],
-    //   },
-    // });
-
-    // await ctx.prisma.spending.deleteMany();
-
-    ctx.prisma.spending
-      .create({
-        data: {
-          name: "Poyraz's Group",
-          users: [
-            {
-              userId: "64027bcffa8b812aec8e552b",
-              name: "Poyraz",
-              image:
-                "https://www.indiewire.com/wp-content/uploads/2022/02/Ana-de-Armas.jpg",
-            },
-          ],
-          spendingGroupID: "64028482c32f2ac4724d5f64",
-          amount: 25,
-          createdAt: new Date(),
-        },
+  add: publicProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        amount: z.number(),
+        groupId: z.string(),
       })
-      .then(() => {
-        console.log("finito");
-        return {
-          data: "allSpendings",
-        };
-      });
-    // const allSpendings = await ctx.prisma.spending.findMany({
-    //   where: {
-    //     spendingGroupID: "64028482c32f2ac4724d5f64",
-    //   },
-    // });
-  }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      ctx.prisma.spending
+        .create({
+          data: {
+            name: input.name,
+            users: [
+              {
+                userId: "64027bcffa8b812aec8e552b",
+                name: "Poyraz",
+                image:
+                  "https://www.indiewire.com/wp-content/uploads/2022/02/Ana-de-Armas.jpg",
+              },
+            ],
+            spendingGroupID: input.groupId,
+            amount: input.amount,
+            createdAt: new Date(),
+          },
+        })
+        .then(() => {
+          console.log("finito");
+          return {
+            data: "allSpendings",
+          };
+        });
+    }),
   getAll: publicProcedure.query(async ({ ctx }) => {
     const userID = ctx.session?.user.id;
     if (!userID) {
@@ -53,17 +47,51 @@ export const groupRouter = createTRPCRouter({
         error: "Not auth",
       };
     }
+
+    /*
+
+    await.ctx.pri
+
+
+    */
+
     const data = await ctx.prisma.spendingGroup.findMany({
       where: {
-        users: {
+        userIDs: {
           has: userID,
         },
       },
     });
-
+    console.log(userID);
     return {
       data,
     };
+  }),
+  createGroup: publicProcedure.mutation(async ({ ctx }) => {
+    const userID = ctx.session?.user.id;
+    if (!userID) {
+      return {
+        error: "Not auth",
+      };
+    }
+    const newGroup = await ctx.prisma.spendingGroup.create({
+      data: {
+        name: "Poyraz GurA",
+        groupImage:
+          "https://media.cntraveler.com/photos/60e612ae0a709e97d73d9c60/1:1/w_3840,h_3840,c_limit/Beach%20Vacation%20Packing%20List-2021_GettyImages-1030311160.jpg",
+        users: [
+          {
+            userId: "64027bcffa8b812aec8e552b",
+            name: "Poyraz",
+            image:
+              "https://www.indiewire.com/wp-content/uploads/2022/02/Ana-de-Armas.jpg",
+          },
+        ],
+        userIDs: [userID],
+      },
+    });
+
+    return { newGroup };
   }),
 
   check: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
@@ -92,7 +120,7 @@ export const groupRouter = createTRPCRouter({
       };
     }
 
-    const isInGroup = groupData?.users.includes(data);
+    const isInGroup = groupData?.userIDs.includes(data);
 
     if (!isInGroup) {
       return {

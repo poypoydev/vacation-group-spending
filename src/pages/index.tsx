@@ -11,6 +11,7 @@ const Home: NextPage = ({}) => {
   const router = useRouter();
 
   const ownGroups = api.group.getAll.useQuery();
+  const mut = api.group.createGroup.useMutation();
   if (status === "loading") {
     return <span>Loading...</span>;
   }
@@ -30,7 +31,7 @@ const Home: NextPage = ({}) => {
       <button onClick={() => signOut()}>Sign Out</button>
 
       <p className="my-32">{JSON.stringify(ownGroups.data)}</p>
-
+      <button onClick={() => mut.mutate()}>Create Group Fast</button>
       {ownGroups.data?.data?.map((group, index) => {
         return (
           <button

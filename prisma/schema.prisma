@@ -50,6 +50,8 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+  
+
 }
 
 model VerificationToken {
@@ -63,8 +65,10 @@ model VerificationToken {
 
 model SpendingGroup {
     id            String  @id @default(auto()) @map("_id") @db.ObjectId
-    users         String[]
+    userIDs  String[]   @db.ObjectId
+    users    userSpender[] 
     name String
+    groupImage String
 }
 
 

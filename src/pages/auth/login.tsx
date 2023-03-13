@@ -11,9 +11,11 @@ const Login: NextPage = () => {
   }
 
   return (
-    <button className="bg-red-400 px-2 py-1" onClick={() => signIn("google")}>
-      Sign In
-    </button>
+    <>
+      <button className="bg-red-400 px-2 py-1" onClick={() => signIn("google")}>
+        Sign In
+      </button>
+    </>
   );
 };
 
