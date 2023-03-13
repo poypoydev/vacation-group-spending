@@ -110,7 +110,7 @@ const DialogMenu: FC<{
                 <h1 className=" mt-2 text-[#AAA]">
                   Check the users you want to add to this spending.
                 </h1>
-                <div className="mt-3 flex flex-wrap items-center rounded-md border py-4 ">
+                <div className="mt-3 flex flex-wrap items-center rounded-md border py-2 ">
                   {users?.map((val, index) => {
                     return <UserCheck user={val} />;
                   })}
